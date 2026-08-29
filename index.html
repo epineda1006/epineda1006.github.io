@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    /* Apply the saved theme before first paint so there is no flash. */
+    (function(){
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme','dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="description" content="Eric Pineda Ramirez — AI/ML Researcher & Engineer at Fresno State. Building Relay, an on-device computer vision accessibility app. NSF USHER Scholar.">
   <title>Eric Pineda Ramirez</title>
 
@@ -33,8 +43,8 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
                    "Helvetica Neue", Arial, sans-serif;
-      background: #fff;
-      color: #1d1d1f;
+      background: var(--bg);
+      color: var(--text);
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
@@ -50,6 +60,11 @@
       --border-lt: #e8e8ed;
       --green:     #34c759;
       --blue:      #007aff;
+      --nav-bg:    rgba(255,255,255,0.85);
+      --drawer-bg: rgba(255,255,255,0.97);
+      --card-hover: #fafafa;
+      --fwd-hover:  #ebebf0;
+      color-scheme: light;
 
       --ff-disp: -apple-system, BlinkMacSystemFont, "SF Pro Display",
                  "Helvetica Neue", Arial, sans-serif;
@@ -65,6 +80,49 @@
       --pv:  100px;
     }
 
+    /* ── Dark mode: opt-in via the nav toggle, remembered per browser ── */
+    :root[data-theme="dark"] {
+      --text:       #f5f5f7;
+      --text-2:     #a1a1a6;
+      --text-3:     #8e8e93;
+      --bg:         #151515;
+      --bg-alt:     #1e1e1e;
+      --border:     #3a3a3c;
+      --border-lt:  #2a2a2c;
+      --green:      #30d158;
+      --blue:       #0a84ff;
+      --nav-bg:     rgba(21,21,21,0.85);
+      --drawer-bg:  rgba(21,21,21,0.97);
+      --card-hover: #222226;
+      --fwd-hover:  #26262b;
+      color-scheme: dark;
+    }
+    /* Cards and panels that used a near-white wash need a touch of lift */
+    :root[data-theme="dark"] .proj-card,
+    :root[data-theme="dark"] .fwd-card { background: var(--bg-alt); border-color: var(--border-lt); }
+    /* Hover must out-specify the rules above, or it never fires in dark mode */
+    :root[data-theme="dark"] .proj-card:hover { background: var(--card-hover); }
+    :root[data-theme="dark"] .fwd-card:hover  { background: var(--fwd-hover); border-color: var(--border); }
+    /* Radial mask graphics read too hot against a dark ground */
+    :root[data-theme="dark"] .hero-mask,
+    :root[data-theme="dark"] .phone-frame { opacity: .85; }
+    /* Keep embedded logos and the headshot from glaring */
+    :root[data-theme="dark"] .edu-badge img { filter: brightness(.94); }
+
+    /* ── Theme toggle button ─────────────────────────────────────────── */
+    .nav-theme {
+      position: absolute; right: var(--ph); top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 8px; cursor: pointer;
+      color: var(--text-2); transition: color .2s, background .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-theme:hover { color: var(--text); background: var(--bg-alt); }
+    .nav-theme svg { display: block; }
+    .nav-theme .icon-sun { display: none; }
+    :root[data-theme="dark"] .nav-theme .icon-sun  { display: block; }
+    :root[data-theme="dark"] .nav-theme .icon-moon { display: none; }
+
     /* ─── PROGRESS BAR ──────────────────────── */
     #bar {
       position: fixed; top: 0; left: 0; width: 0%; height: 2px;
@@ -77,7 +135,7 @@
       position: fixed; top: 0; left: 0; right: 0; height: 52px;
       display: flex; align-items: center; justify-content: center;
       padding: 0 var(--ph); z-index: 200;
-      background: rgba(255,255,255,0.85);
+      background: var(--nav-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-lt);
@@ -273,11 +331,15 @@
       border: 1px solid var(--border-lt); border-radius: 20px; overflow: hidden;
     }
     .proj-card { background: var(--bg); padding: 40px 36px; transition: background .18s, opacity .95s var(--ease-out), transform .95s var(--ease-out); }
-    .proj-card:hover { background: #fafafa; }
+    .proj-card:hover { background: var(--card-hover); }
     .proj-card.span2 {
       grid-column: 1 / -1;
       display: grid; grid-template-columns: 1.1fr 1fr; gap: 52px; align-items: center;
     }
+    /* Full-width card with no companion visual: cap the measure so lines stay readable */
+    .proj-card.wide { grid-column: 1 / -1; }
+    .proj-card.wide .proj-desc,
+    .proj-card.wide .proj-tagline { max-width: 76ch; }
     .proj-status {
       display: inline-flex; align-items: center; gap: 6px;
       font-family: var(--ff-mono); font-size: 9px; letter-spacing: .16em;
@@ -334,7 +396,7 @@
       padding: 52px; align-items: center; background: var(--bg-alt);
       transition: border-color .3s, background .2s, opacity .95s var(--ease-out), transform .95s var(--ease-out);
     }
-    .fwd-card:hover { border-color: var(--border); background: #ebebf0; }
+    .fwd-card:hover { border-color: var(--border); background: var(--fwd-hover); }
     .fwd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
     /* Research Statement */
@@ -459,7 +521,7 @@
     .nav-burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
     .nav-drawer {
       display: none; position: fixed; top: 52px; left: 0; right: 0;
-      background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);
+      background: var(--drawer-bg); backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-lt);
       padding: 8px 24px 20px; z-index: 199;
@@ -514,11 +576,15 @@
       <li><a href="#experience">Experience</a></li>
       <li><a href="#research">Research</a></li>
       <li><a href="#projects">Projects</a></li>
-      <li><a href="#forward">What's Next</a></li>
+      <li><a href="#forward">Independent Research</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <button class="nav-burger" id="burger" aria-label="Menu">
       <span></span><span></span><span></span>
+    </button>
+    <button class="nav-theme" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     </button>
   </nav>
   <div class="nav-drawer" id="drawer">
@@ -528,7 +594,7 @@
     <a href="#experience" class="drawer-link">Experience</a>
     <a href="#research" class="drawer-link">Research</a>
     <a href="#projects" class="drawer-link">Projects</a>
-    <a href="#forward" class="drawer-link">What's Next</a>
+    <a href="#forward" class="drawer-link">Independent Research</a>
     <a href="#contact" class="drawer-link">Contact</a>
   </div>
 
@@ -631,7 +697,7 @@
           <p class="edu-deg">Bachelor of Science — Computer Science &nbsp;·&nbsp; Aug 2024 – May 2028 &nbsp;·&nbsp; GPA 3.2</p>
           <p class="edu-detail">
             Activities: USHER Computer Science Program (NSF) &nbsp;·&nbsp; CS Club Event Coordinator<br>
-            Relevant Coursework: Data Structures &nbsp;·&nbsp; Computer Architecture &nbsp;·&nbsp; OOP<br>
+            Relevant Coursework: Advanced Data Structures &amp; Algorithms &nbsp;·&nbsp; ARM64 Assembly &amp; Computer Organization &nbsp;·&nbsp; Programming Languages (Haskell) &nbsp;·&nbsp; OOP (C++)<br>
             Track: AI Engineering &nbsp;·&nbsp; 2024 Catalog
           </p>
         </div>
@@ -649,25 +715,7 @@
       <div class="timeline">
 
         <div class="tl-item r">
-          <div class="tl-date">Apr 2026<br>Present</div>
-          <div>
-            <p class="tl-role">Project &amp; Research Lead — F3 Orchard Challenge</p>
-            <p class="tl-org">F3 Innovate &nbsp;·&nbsp; Satellite-Based Orchard Stress Mapping &nbsp;·&nbsp; Fresno County, CA</p>
-            <p class="tl-desc">
-              Leading a team in F3 Innovate's applied data challenge, building time-series
-              vegetation stress models from publicly available satellite imagery. Responsible
-              for dataset pipeline, model architecture, and team coordination across the
-              full project lifecycle.
-            </p>
-            <div class="tags">
-              <span class="tag">NDVI/NDMI/NDRE</span><span class="tag">Satellite Imagery</span>
-              <span class="tag">Python</span><span class="tag">Team Lead</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-item r d2">
-          <div class="tl-date">Mar 2026<br>Present</div>
+          <div class="tl-date">Mar 2026<br>Aug 2026</div>
           <div>
             <p class="tl-role">IT Intern</p>
             <p class="tl-org">Fowler Unified School District &nbsp;·&nbsp; Internship &nbsp;·&nbsp; Fowler, CA &nbsp;·&nbsp; On-site</p>
@@ -677,11 +725,33 @@
               Refactored and standardized role-based form logic across all 9 PHP files, ensuring consistent
               behavior for admin and employee roles. Audited and cleaned district databases by identifying
               and removing unused email accounts, reducing attack surface and improving security posture.
+              Designed and built the IT Knowledge Base Builder, a two-stage local LLM pipeline that turns
+              resolved help-desk tickets into a searchable internal wiki, running entirely on district
+              infrastructure so no student or staff data leaves the network.
             </p>
             <div class="tags">
               <span class="tag">PHP</span><span class="tag">MySQL</span>
+              <span class="tag">Local LLMs</span><span class="tag">Ollama</span>
               <span class="tag">Cybersecurity</span><span class="tag">Role-Based Auth</span>
               <span class="tag">IT Infrastructure</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-item r d2">
+          <div class="tl-date">Apr 2026<br>May 2026</div>
+          <div>
+            <p class="tl-role">Project &amp; Research Lead — SpectralCV</p>
+            <p class="tl-org">F3 Innovate &nbsp;·&nbsp; Satellite-Based Orchard Stress Mapping &nbsp;·&nbsp; Fresno County, CA &nbsp;·&nbsp; Honorable Mention</p>
+            <p class="tl-desc">
+              Led a two-person team in F3 Innovate's 21-day applied data challenge, building
+              time-series vegetation stress models from publicly available satellite imagery.
+              Responsible for dataset pipeline, model architecture, and team coordination across
+              the full project lifecycle. Earned an Honorable Mention.
+            </p>
+            <div class="tags">
+              <span class="tag">NDVI/NDMI/NDRE</span><span class="tag">Satellite Imagery</span>
+              <span class="tag">Python</span><span class="tag">Team Lead</span>
             </div>
           </div>
         </div>
@@ -722,13 +792,13 @@
         <div class="tl-item r d4">
           <div class="tl-date">Nov 2025<br>Dec 2025</div>
           <div>
-            <p class="tl-role">Team Member — F3 Frostbite Challenge</p>
+            <p class="tl-role">Team Member — FrostBite Challenge</p>
             <p class="tl-org">F3 Innovate &nbsp;·&nbsp; UC San Diego &nbsp;·&nbsp; National Data Platform &nbsp;·&nbsp; Honorable Mention</p>
             <p class="tl-desc">
               Competed in a 21-day national applied AI challenge, building short-term frost
               risk forecasting models from 15 years of hourly CIMIS weather data across
-              18 California stations. Placed top 8 among 11 teams competing against top
-              universities nationwide. Credential: F3i-FRFC-2025-012.
+              18 California stations, evaluated with Brier Score and calibration metrics.
+              Six-person team. Credential: F3i-FRFC-2025-012.
             </p>
             <div class="tags">
               <span class="tag">Machine Learning</span><span class="tag">Python</span>
@@ -807,8 +877,8 @@
 
         <div style="background:var(--bg-alt); padding:40px 36px; display:grid; grid-template-columns:1fr 1fr; gap:0;" class="r d1 research-two-col">
           <div style="padding-right:40px; border-right:1px solid var(--border-lt);">
-            <p class="proj-status active">Active &nbsp;·&nbsp; April 2026 – Present</p>
-            <h3 class="proj-name" style="font-size:22px;">F3 Orchard Stress Mapping</h3>
+            <p class="proj-status">Honorable Mention &nbsp;·&nbsp; April – May 2026</p>
+            <h3 class="proj-name" style="font-size:22px;">SpectralCV — Orchard Stress Mapping</h3>
             <p class="proj-tagline">Project &amp; Research Lead &nbsp;·&nbsp; F3 Innovate</p>
             <p class="proj-desc">
               Empirical satellite data analysis using NDVI, NDMI, and NDRE vegetation indices
@@ -836,24 +906,6 @@
               <span class="tag">LLM</span><span class="tag">Generative AI</span>
               <span class="tag">Identity Architecture</span><span class="tag">Auth Systems</span>
             </div>
-          </div>
-        </div>
-        <div style="border-top: 1px solid var(--border-lt); margin: 0;"></div>
-
-        <div style="background:var(--bg); padding:40px 36px;" class="r d2">
-          <p class="proj-status research">Research Interest &nbsp;·&nbsp; Active</p>
-          <h3 class="proj-name" style="font-size:22px;">AI Inclusion &amp; Responsible Systems</h3>
-          <p class="proj-tagline">Independent Research Direction</p>
-          <p class="proj-desc">
-            Most AI systems are designed without the people they most affect in the room.
-            I'm interested in the structural question behind that: how do deployment decisions,
-            benchmark choices, and training data shape who a system works for — and who it
-            silently excludes? Responsible AI, to me, isn't a checklist. It's an engineering
-            constraint that should inform every design decision from the start.
-          </p>
-          <div class="tags">
-            <span class="tag">Responsible AI</span><span class="tag">AI Fairness</span>
-            <span class="tag">Deployment Ethics</span><span class="tag">Inclusive Design</span>
           </div>
         </div>
 
@@ -901,12 +953,12 @@
 
         <!-- F3 Orchard -->
         <div class="proj-card r d1">
-          <div class="proj-status active">Active &nbsp;·&nbsp; April 2026 – Present</div>
-          <h3 class="proj-name">F3 Orchard Challenge</h3>
+          <div class="proj-status">Honorable Mention &nbsp;·&nbsp; April – May 2026</div>
+          <h3 class="proj-name">SpectralCV</h3>
           <p class="proj-tagline">F3 Innovate &nbsp;·&nbsp; Fresno County, CA &nbsp;·&nbsp; Project &amp; Research Lead</p>
           <p class="proj-desc">
-            Leading a team in F3 Innovate's satellite-based orchard stress mapping
-            challenge. Building time-series models from publicly available satellite data
+            Led a two-person team in F3 Innovate's 21-day satellite-based orchard stress mapping
+            challenge. Built time-series models from publicly available satellite data
             using NDVI, NDMI, and NDRE vegetation indices across Fresno County orchards.
             Responsible for dataset pipeline, model architecture, and team coordination.
           </p>
@@ -918,7 +970,7 @@
 
         <!-- eVal_V3 -->
         <div class="proj-card r d2">
-          <div class="proj-status active">Active &nbsp;·&nbsp; Mar 2026</div>
+          <div class="proj-status">Mar – Aug 2026</div>
           <h3 class="proj-name">eVal_V3</h3>
           <p class="proj-tagline">District-Wide Employee Evaluation System &nbsp;·&nbsp; Fowler USD</p>
           <p class="proj-desc">
@@ -932,18 +984,38 @@
           </div>
         </div>
 
+        <!-- IT Knowledge Base Builder -->
+        <div class="proj-card r d2">
+          <div class="proj-status">Mar – Aug 2026</div>
+          <h3 class="proj-name">IT Knowledge Base Builder</h3>
+          <p class="proj-tagline">Two-Stage Local LLM Pipeline &nbsp;·&nbsp; Fowler USD</p>
+          <p class="proj-desc">
+            Turns years of resolved help-desk tickets into a searchable internal wiki, running
+            entirely on district-hosted infrastructure so no data leaves the network. A local
+            llama3.1:8b model extracts structured JSON from each ticket; qwen2.5:14b writes the
+            article. Semantic duplicate detection via nomic-embed-text embeddings merges new
+            information into existing articles, and low-confidence extractions route to human
+            review instead of publishing silently. Ran 31 real tickets end to end into 30
+            generated articles, served through a Flask and SQLite staff portal.
+          </p>
+          <div class="tags">
+            <span class="tag">Local LLMs</span><span class="tag">Ollama</span>
+            <span class="tag">Embeddings</span><span class="tag">Python</span>
+            <span class="tag">Flask</span><span class="tag">SQLite</span>
+          </div>
+        </div>
+
         <!-- FrostBit -->
         <div class="proj-card r d3">
           <div class="proj-status">Honorable Mention &nbsp;·&nbsp; Dec 2025</div>
-          <h3 class="proj-name">F3 Frostbite Challenge</h3>
+          <h3 class="proj-name">FrostBite</h3>
           <p class="proj-tagline">F3 Innovate &nbsp;·&nbsp; UC San Diego &nbsp;·&nbsp; National Data Platform</p>
           <p class="proj-desc">
             Short-term frost risk forecasting ML models trained on 15 years of hourly weather data
             from 18 CIMIS stations across California. Probabilistic temperature and frost threshold
             predictions evaluated using Brier Score and calibration metrics.
-            Placed top 8 among 11 teams, competing against top universities nationwide —
-            6-person team, 21 days, end-to-end: data collection, preprocessing, feature engineering,
-            and model evaluation.
+            Six-person team, 21 days, end-to-end: data collection, preprocessing,
+            feature engineering, and model evaluation.
           </p>
           <div class="tags">
             <span class="tag">Python</span><span class="tag">Machine Learning</span>
@@ -952,7 +1024,7 @@
         </div>
 
         <!-- AI Research Project -->
-        <div class="proj-card r d4">
+        <div class="proj-card wide r d4">
           <div class="proj-status research">Research &nbsp;·&nbsp; Fall 2025 – Present</div>
           <h3 class="proj-name">Hibiki-AI</h3>
           <p class="proj-tagline">AIIS Lab &nbsp;·&nbsp; Fresno State &nbsp;·&nbsp; Dr. Thanos</p>
@@ -981,28 +1053,21 @@
   <!-- ══ FORWARD ══ -->
   <section id="forward">
     <div class="wrap">
-      <p class="sec-label r">What's Next</p>
-      <h2 class="sec-title r">What comes <span>next.</span></h2>
+      <p class="sec-label r">What I'm Researching</p>
+      <h2 class="sec-title r">Accessible <span>research.</span></h2>
+      <p class="sec-lead r" style="max-width:720px; margin:-8px 0 34px; font-size:17px; line-height:1.7; color:var(--text-2);">
+        Directions I'm pursuing on my own time, outside coursework and lab work. Each one
+        started as a problem I ran into building something, and each one feeds back into
+        the work above.
+      </p>
       <div style="display:grid; gap:16px;">
-
-        <!-- Relay shipping -->
-        <div class="fwd-card r" style="display:block; padding:44px;">
-          <p class="fwd-eye">iOS &nbsp;·&nbsp; iPadOS &nbsp;·&nbsp; App Store &nbsp;·&nbsp; Free Forever</p>
-          <h3 class="fwd-title">Relay, shipping</h3>
-          <p class="fwd-desc">
-            An iOS/iPadOS accessibility app built entirely on on-device AI — no internet
-            required, no speed compromised. Accessibility should be a given, not a workaround.
-            I'm building it free, forever, from lived experience as a full-time power
-            wheelchair user. The App Store is the finish line.
-          </p>
-        </div>
 
         <!-- Two-column row -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;" class="fwd-two-col">
 
           <!-- On-Device ML Research -->
           <div class="fwd-card r d1" style="display:block; padding:40px 36px;">
-            <p class="fwd-eye">Research &nbsp;·&nbsp; Ongoing</p>
+            <p class="fwd-eye">Independent &nbsp;·&nbsp; Ongoing</p>
             <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">On-Device ML</h3>
             <p class="fwd-desc">
               Continuing to push the boundary of what runs entirely on-device. I'm researching
@@ -1016,15 +1081,16 @@
 
           <!-- Computer Vision for Accessibility -->
           <div class="fwd-card r d2" style="display:block; padding:40px 36px;">
-            <p class="fwd-eye">Research &nbsp;·&nbsp; Active Interest</p>
-            <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">CV for Access</h3>
+            <p class="fwd-eye">Independent &nbsp;·&nbsp; Active</p>
+            <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">CV for Wayfinding</h3>
             <p class="fwd-desc">
-              Investigating how computer vision can reconstruct physical environments
-              accessibly — from inaccessible public interfaces to real-world wayfinding —
-              and what it means to build perception systems from the ground up on lived experience.
+              Relay asks what a camera can read off a single interface. This is the larger
+              question behind it: what can vision tell you about whether a space is usable at
+              all — routes, thresholds, obstacles, and the distance between a place being
+              technically accessible and actually navigable.
             </p>
             <div class="tags" style="margin-top:20px;">
-              <span class="tag">Computer Vision</span><span class="tag">OCR</span><span class="tag">Scene Understanding</span>
+              <span class="tag">Scene Understanding</span><span class="tag">Spatial Reasoning</span><span class="tag">Wayfinding</span>
             </div>
           </div>
 
@@ -1035,7 +1101,7 @@
 
           <!-- Multimodal AI -->
           <div class="fwd-card r d3" style="display:block; padding:40px 36px;">
-            <p class="fwd-eye">Research &nbsp;·&nbsp; Exploring</p>
+            <p class="fwd-eye">Independent &nbsp;·&nbsp; Exploring</p>
             <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">Multimodal AI</h3>
             <p class="fwd-desc">
               Exploring how language models and vision systems can be unified to reason across
@@ -1047,20 +1113,38 @@
             </div>
           </div>
 
-          <!-- ML Engineering at Scale -->
+          <!-- Local LLM Systems -->
           <div class="fwd-card r d4" style="display:block; padding:40px 36px;">
-            <p class="fwd-eye">Career &nbsp;·&nbsp; Target: Summer 2027</p>
-            <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">ML Engineering</h3>
+            <p class="fwd-eye">Independent &nbsp;·&nbsp; Ongoing</p>
+            <h3 class="fwd-title" style="font-size:clamp(26px,3vw,38px);">Local LLM Systems</h3>
             <p class="fwd-desc">
-              Building toward an AI/ML Engineering role where research meets production —
-              designing systems that are fast, responsible, and built to last. Closing gaps
-              in PyTorch, Linear Algebra, and systems-level ML every week.
+              Studying what it takes to run useful language models on infrastructure you
+              control — model selection for a given job, confidence thresholds that decide
+              when a machine should defer to a person, and retrieval that stays honest about
+              what it doesn't know.
             </p>
             <div class="tags" style="margin-top:20px;">
-              <span class="tag">Systems ML</span><span class="tag">AI Engineering</span><span class="tag">Production AI</span>
+              <span class="tag">Local LLMs</span><span class="tag">Retrieval</span><span class="tag">Human-in-the-Loop</span>
             </div>
           </div>
 
+        </div>
+
+        <!-- AI Inclusion & Responsible Systems -->
+        <div class="fwd-card r" style="display:block; padding:44px;">
+          <p class="fwd-eye">Independent &nbsp;·&nbsp; Active</p>
+          <h3 class="fwd-title">AI Inclusion &amp; Responsible Systems</h3>
+          <p class="fwd-desc">
+            Most AI systems are designed without the people they most affect in the room.
+            I'm interested in the structural question behind that: how do deployment decisions,
+            benchmark choices, and training data shape who a system works for — and who it
+            silently excludes? Responsible AI, to me, isn't a checklist. It's an engineering
+            constraint that should inform every design decision from the start.
+          </p>
+          <div class="tags" style="margin-top:20px;">
+            <span class="tag">Responsible AI</span><span class="tag">AI Fairness</span>
+            <span class="tag">Deployment Ethics</span><span class="tag">Inclusive Design</span>
+          </div>
         </div>
 
       </div>
@@ -1202,7 +1286,7 @@
   </section>
 
   <footer>
-    <span>© 2026 Eric Pineda Ramirez &nbsp;·&nbsp; Updated April 2026</span>
+    <span>© 2026 Eric Pineda Ramirez &nbsp;·&nbsp; Updated August 2026</span>
   </footer>
 
   <script>
@@ -1240,6 +1324,20 @@
       burger.classList.toggle('open');
       drawer.classList.toggle('open');
     });
+  </script>
+  <script>
+    /* Theme toggle. Light is the default; the choice is remembered per browser. */
+    (function(){
+      var btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var root = document.documentElement;
+        var isDark = root.getAttribute('data-theme') === 'dark';
+        if (isDark) { root.removeAttribute('data-theme'); }
+        else        { root.setAttribute('data-theme', 'dark'); }
+        try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
+      });
+    })();
   </script>
 </body>
 </html>
